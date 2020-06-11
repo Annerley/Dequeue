@@ -1,4 +1,7 @@
 #pragma once
+
+#include <stdexcept>
+
 using ValueType = double;
 template <typename ValueType>
 class Dequeue
@@ -31,18 +34,18 @@ public:
 	void pushBack(ValueType value);
 
 	//операция удаления конечного элемента,
-	//void popBack();
+	void popBack();
 
 	//операция вставки нового элемента в начало,
 	void pushFront(ValueType value);
 
 	//операция удаления начального элемента.
-	/*void popFront();
+	void popFront();
 
 	//проверка на наличие элементов
 	bool isEmpty();
-
-	size_t size() const;*/
+	
+	size_t size() const;
 private:
 	Node* _head;
 	Node* _tail;
@@ -50,6 +53,19 @@ private:
 
 	void forceNodeDelete(Node* node);
 };
+
+template<typename ValueType>
+inline bool Dequeue<ValueType>::isEmpty()
+{
+	if (_size == 0)return true;
+	return false;
+}
+
+template<typename ValueType>
+inline size_t Dequeue<ValueType>::size() const
+{
+	return _size;
+}
 
 template<typename ValueType>
 inline void Dequeue<ValueType>::forceNodeDelete(Node* node)
@@ -80,6 +96,7 @@ inline Dequeue<ValueType>::~Dequeue()
 template<typename ValueType>
 inline ValueType& Dequeue<ValueType>::operator[](const size_t pos) const
 {
+	if(pos >_size || _size < 0) throw std::out_of_range("Incorrect index");
 	Node* buf;
 	if (_size == 1)
 	{
@@ -96,7 +113,7 @@ inline ValueType& Dequeue<ValueType>::operator[](const size_t pos) const
 	else
 	{
 		buf = _tail;
-		for (size_t i = _size; i>pos ; i--)
+		for (size_t i = _size-1; i>pos ; i--)
 		{
 			buf = buf->prev;
 		}
@@ -130,6 +147,15 @@ inline void Dequeue<ValueType>::pushBack(ValueType value)
 }
 
 template<typename ValueType>
+inline void Dequeue<ValueType>::popBack()
+{
+	_tail = _tail->prev;
+	delete _tail->next;
+	_tail->next = nullptr;
+	_size--;
+}
+
+template<typename ValueType>
 inline void Dequeue<ValueType>::pushFront(ValueType value)
 {
 	Node* buf = _head;
@@ -138,4 +164,14 @@ inline void Dequeue<ValueType>::pushFront(ValueType value)
 	_head->next = buf;
 	_head->value = value;
 	_head->prev = nullptr;
+	_size++;
+}
+
+template<typename ValueType>
+inline void Dequeue<ValueType>::popFront()
+{
+	_head = _head->next;
+	_head->prev = nullptr;
+	_size--;
+
 }
