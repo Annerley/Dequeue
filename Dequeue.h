@@ -8,8 +8,10 @@ class Dequeue
 {
 	
 	struct Node {
-		/*Node(const ValueType& value, Node* next = nullptr, Node* prev = nullptr);
-		~Node();
+		Node()
+		{}
+		Node(const ValueType& value, Node* next, Node* prev);
+		/*~Node();
 
 		void insertNext(const ValueType& value);
 		void removeNext();*/
@@ -22,13 +24,16 @@ class Dequeue
 public:
 	//тройка конструкторов
 	Dequeue();
-	//Dequeue(const Dequeue& copyDequeue);
+	Dequeue(const Dequeue& copyDequeue);
 	//Dequeue& operator=(const Dequeue& copyDequeue);
 
 	~Dequeue();
 
 	// доступ к значению элемента по индексу
 	ValueType& operator[](const size_t pos) const;
+
+	//поиск по значению
+	size_t find(ValueType value) const;
 
 	//операция вставки нового элемента в конец
 	void pushBack(ValueType value);
@@ -88,6 +93,33 @@ inline Dequeue<ValueType>::Dequeue()
 }
 
 template<typename ValueType>
+inline Dequeue<ValueType>::Dequeue(const Dequeue& copyDequeue)
+{
+	this->_size = copyDequeue._size;
+	if (this->_size == 0) {
+		this->_head = nullptr;
+		this->_tail = nullptr;
+		return;
+	}
+
+	this->_head = new Node(copyDequeue._head->value, copyDequeue._head->next, copyDequeue._head->prev);
+
+	Node* currentNode = this->_head;
+	Node* currentCopyNode = copyDequeue._head;
+
+	while (currentCopyNode->next) {
+		currentCopyNode = currentCopyNode->next;
+		currentNode->next = new Node(currentCopyNode->value, currentCopyNode->next, currentCopyNode->prev);
+		currentNode = currentNode->next;
+	}
+	this->_tail = copyDequeue._tail;
+	_tail->prev = copyDequeue._tail->prev;
+	_tail->next = nullptr;
+
+
+}
+
+template<typename ValueType>
 inline Dequeue<ValueType>::~Dequeue()
 {
 	forceNodeDelete(_head);
@@ -119,6 +151,18 @@ inline ValueType& Dequeue<ValueType>::operator[](const size_t pos) const
 		}
 	}
 	return buf->value;
+}
+
+template<typename ValueType>
+inline size_t Dequeue<ValueType>::find(ValueType value) const
+{
+	Node* buf = _head;
+	for (size_t i = 0; i < _size; i++)
+	{
+		if (buf->value == value)return i;
+		buf = buf->next;
+	}
+	return -1;
 }
 
 template<typename ValueType>
@@ -173,5 +217,14 @@ inline void Dequeue<ValueType>::popFront()
 	_head = _head->next;
 	_head->prev = nullptr;
 	_size--;
+
+}
+
+template<typename ValueType>
+inline Dequeue<ValueType>::Node::Node(const ValueType& value, Node* next, Node* prev)
+{
+	this->value = value;
+	this->next = next;
+	this->prev = prev;
 
 }
