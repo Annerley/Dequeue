@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <cassert>
+
 using ValueType = double;
 template <typename ValueType>
 class Dequeue
@@ -36,13 +38,13 @@ public:
 	size_t find(ValueType value) const;
 
 	//операция вставки нового элемента в конец
-	void pushBack(ValueType value);
+	void pushBack(const ValueType& value);
 
 	//операция удаления конечного элемента,
 	void popBack();
 
 	//операция вставки нового элемента в начало,
-	void pushFront(ValueType value);
+	void pushFront(const ValueType& value);
 
 	//операция удаления начального элемента.
 	void popFront();
@@ -128,7 +130,7 @@ inline Dequeue<ValueType>::~Dequeue()
 template<typename ValueType>
 inline ValueType& Dequeue<ValueType>::operator[](const size_t pos) const
 {
-	if(pos >_size || _size < 0) throw std::out_of_range("Incorrect index");
+	if(pos >_size || _size <= 0) throw std::out_of_range("Incorrect index");
 	Node* buf;
 	if (_size == 1)
 	{
@@ -166,7 +168,7 @@ inline size_t Dequeue<ValueType>::find(ValueType value) const
 }
 
 template<typename ValueType>
-inline void Dequeue<ValueType>::pushBack(ValueType value)
+inline void Dequeue<ValueType>::pushBack(const ValueType& value)
 {
 	if (_size == 0)
 	{
@@ -193,14 +195,26 @@ inline void Dequeue<ValueType>::pushBack(ValueType value)
 template<typename ValueType>
 inline void Dequeue<ValueType>::popBack()
 {
+	if (size < 1)
+	{
+		throw std::out_of_range("incorrect size");
+	}
+	if (_size == 1)
+	{
+		_head = nullptr;
+		_tail = nullptr;
+	}
+	else
+	{
 	_tail = _tail->prev;
 	delete _tail->next;
 	_tail->next = nullptr;
+	}
 	_size--;
 }
 
 template<typename ValueType>
-inline void Dequeue<ValueType>::pushFront(ValueType value)
+inline void Dequeue<ValueType>::pushFront(const ValueType& value)
 {
 	Node* buf = _head;
 	_head->prev = new Node;
@@ -214,8 +228,20 @@ inline void Dequeue<ValueType>::pushFront(ValueType value)
 template<typename ValueType>
 inline void Dequeue<ValueType>::popFront()
 {
-	_head = _head->next;
-	_head->prev = nullptr;
+	if (_size < 1)
+	{
+		throw std::out_of_range("incorrect size");
+	}
+
+	if (_size == 1)
+	{
+		_head = nullptr;
+	}
+	else
+	{
+		_head = _head->next;
+		_head->prev = nullptr;
+	}
 	_size--;
 
 }
